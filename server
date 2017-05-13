@@ -1,0 +1,10 @@
+local tArgs = {...}
+rednet.open("top")
+rednet.host("ccweb",tArgs[1])
+
+while true do
+  local tResp = { rednet.receive("ccweb") }
+  if tResp[2]=="GET" then
+    rednet.send(tResp[1],'[["header","Hello World"]]',"ccweb")
+  end
+end

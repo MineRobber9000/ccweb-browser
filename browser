@@ -5,14 +5,25 @@ local function startsWith(s,p)
 end
 local function getPage(url)
   if startsWith(url,"file://") then
-    url = url:sub(7)
-    local h = fs.open("/"..url,"r")
+    url = url:sub(8)
+    local h = fs.open(shell.resolve(url),"r")
     contents = h.readAll()
     h.close()
     return json.decode(contents)
   end
+  if startsWith(url,"rdnt://") then
+    url = url:sub(8)
+    rednet.open("top")
+    request = "GET"
+    ports = {rednet.lookup("ccweb",url)}
+    port = ports[1]
+    rednet.send(port,request,"ccweb")
+    tEvent = { rednet.receive("ccweb") }
+--  return {{"header","Debug"},{"text",tEvent[2]}}
+    return json.decode(tEvent[2])
+  end
+  return {{'header','404 Not Found'},{'text','----\nCCWeb Browser 0.1'}}
 end
-
 local function render(pagetable)
   for i=1,#pagetable do
     if pagetable[i][1] == "header" then
@@ -42,7 +53,7 @@ while true do
     local url = read()
     page = getPage(url)
   end
-  if tEvent[2] == keys.d then
+  if tEvent[2] == keys.d and debug then
     term.setCursorPos(1,termsize[2])
     os.pullEvent("char")
     page = json.decode(read())
