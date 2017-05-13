@@ -1,0 +1,10 @@
+function clear()
+  term.clear()
+  term.setCursorPos(1,1)
+end
+
+function printYellow(text)
+  term.setTextColor(colors.yellow)
+  print(text)
+  term.setTextColor(colors.white)
+end

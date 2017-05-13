@@ -1,0 +1,53 @@
+os.loadAPI(shell.resolve("json"))
+os.loadAPI(shell.resolve("supergui"))
+local function startsWith(s,p)
+  return s:sub(0,p:len()) == p
+end
+local function getPage(url)
+  if startsWith(url,"file://") then
+    url = url:sub(7)
+    local h = fs.open("/"..url,"r")
+    contents = h.readAll()
+    h.close()
+    return json.decode(contents)
+  end
+end
+
+local function render(pagetable)
+  for i=1,#pagetable do
+    if pagetable[i][1] == "header" then
+      supergui.printYellow(pagetable[i][2])
+    else if pagetable[i][1] == "text" then
+      print(pagetable[i][2])
+    end end
+  end
+end
+
+page = {{"header","CCWeb v0.1"},{"text","\nTest."}}
+
+termsize = { term.getSize() }
+
+debug = false
+
+supergui.clear()
+while true do
+  render(page)
+  local tEvent = { os.pullEvent("key") }
+  if tEvent[2] == keys.q then
+    break
+  end
+  if tEvent[2] == keys.g then
+    term.setCursorPos(1,termsize[2])
+    os.pullEvent("char")
+    local url = read()
+    page = getPage(url)
+  end
+  if tEvent[2] == keys.d then
+    term.setCursorPos(1,termsize[2])
+    os.pullEvent("char")
+    page = json.decode(read())
+  end
+  supergui.clear()
+end
+supergui.clear()
+os.pullEvent("char")
